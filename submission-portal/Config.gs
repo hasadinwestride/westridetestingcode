@@ -31,8 +31,8 @@ var CONFIG = {
   /**
    * โครงโฟลเดอร์ปลายทาง
    *
-   * 'module-first'  = Project: UX Design Process/หัศดินทร์ ส่องสี/ไฟล์...   ← ค่าตั้งต้น
-   * 'student-first' = หัศดินทร์ ส่องสี/Project: UX Design Process/ไฟล์...
+   * 'module-first'  = 01 Project: UX Design Process/หัศดินทร์ ส่องสี/ไฟล์...   ← ค่าตั้งต้น
+   * 'student-first' = หัศดินทร์ ส่องสี/01 Project: UX Design Process/ไฟล์...
    * 'flat'          = หัศดินทร์ ส่องสี/ไฟล์...
    *
    * module-first เหมาะกับการตรวจงาน เพราะเปิดโฟลเดอร์โมดูลเดียวแล้วเห็นงานนักเรียนทุกคน
@@ -57,6 +57,9 @@ var CONFIG = {
   /**
    * นิยามของแต่ละโมดูล
    *
+   * title      = หัวข้อที่นักเรียนเห็นบนหน้าส่งงาน — ไม่ต้องมีเลข อ่านสะอาดกว่า
+   * folderName = ชื่อโฟลเดอร์จริงใน Drive — มีเลขนำหน้าเพื่อให้เรียงตามลำดับคอร์ส
+   *              ต้องตรงกับชื่อโฟลเดอร์ที่มีอยู่แล้วเป๊ะ ๆ ไม่งั้นสคริปต์จะสร้างโฟลเดอร์ใหม่ซ้อน
    * id         = ตัวเลขนำหน้าชื่อไฟล์ ควรไล่ต่อเนื่องทั้งคอร์สจะได้ไม่ซ้ำกัน
    * label      = ชื่อที่นักเรียนเห็นในช่องอัปโหลด
    * filePrefix = ชื่อไฟล์จริงใน Drive (ต่อท้ายด้วย _<file_tag>.pdf)
@@ -65,7 +68,7 @@ var CONFIG = {
 
     'module-01': {
       title: 'Project: UX Design Process',
-      folderName: 'Project: UX Design Process',
+      folderName: '01 Project: UX Design Process',
       slots: [
         { id: '01', label: 'User Research Plan', filePrefix: '01-user-research-plan' },
         { id: '02', label: 'Competitive Analysis', filePrefix: '02-competitive-analysis' },
@@ -80,7 +83,7 @@ var CONFIG = {
 
     'module-02': {
       title: 'Project: Research Methodology',
-      folderName: 'Project: Research Methodology',
+      folderName: '02 Project: Research Methodology',
       slots: [
         { id: '04', label: 'Research Methodology', filePrefix: '04-research-methodology' }
       ]
@@ -88,7 +91,7 @@ var CONFIG = {
 
     'module-03': {
       title: 'Project: Research Analysis and Synthesis',
-      folderName: 'Project: Research Analysis and Synthesis',
+      folderName: '03 Project: Research Analysis and Synthesis',
       slots: [
         { id: '05', label: 'Research Analysis & Synthesis', filePrefix: '05-research-analysis' }
       ]
@@ -96,7 +99,7 @@ var CONFIG = {
 
     'module-04': {
       title: 'Project: Sharing Insights & Portfolio',
-      folderName: 'Project: Sharing Insights & Portfolio',
+      folderName: '04 Project: Sharing Insights & Portfolio',
       slots: [
         { id: '06', label: 'Sharing Insights & Portfolio', filePrefix: '06-sharing-insights' }
       ]
@@ -104,7 +107,7 @@ var CONFIG = {
 
     'module-05': {
       title: 'Project: Ideation & Concept Selection',
-      folderName: 'Project: Ideation & Concept Selection',
+      folderName: '05 Project: Ideation & Concept Selection',
       slots: [
         { id: '07', label: 'Ideation & Concept Selection', filePrefix: '07-ideation' }
       ]
@@ -112,7 +115,7 @@ var CONFIG = {
 
     'module-06': {
       title: 'Project: Wireframing Process',
-      folderName: 'Project: Wireframing Process',
+      folderName: '06 Project: Wireframing Process',
       slots: [
         { id: '08', label: 'Wireframing Process', filePrefix: '08-wireframing' }
       ]
@@ -120,7 +123,7 @@ var CONFIG = {
 
     'module-07': {
       title: 'Project: Design System & Responsive UI',
-      folderName: 'Project: Design System & Responsive UI',
+      folderName: '07 Project: Design System & Responsive UI',
       slots: [
         { id: '09', label: 'Design System & Responsive UI', filePrefix: '09-design-system' }
       ]
@@ -128,7 +131,7 @@ var CONFIG = {
 
     'module-08': {
       title: 'Project: From Hi-Fi to Handoff',
-      folderName: 'Project: From Hi-Fi to Handoff',
+      folderName: '08 Project: From Hi-Fi to Handoff',
       slots: [
         { id: '10', label: 'From Hi-Fi to Handoff', filePrefix: '10-hifi-to-handoff' }
       ]

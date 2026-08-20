@@ -264,8 +264,8 @@ Shared Drive ถ้าแอดเป็น group ก็จัดการที
 
 | ค่า | ผลลัพธ์ | เหมาะกับ |
 |---|---|---|
-| `module-first` *(ค่าตั้งต้น)* | `Students/Project: UX Design Process/หัศดินทร์ ส่องสี/01-user-research-plan_หัศดินทร์.pdf` | **ตรวจงาน** — เปิดโฟลเดอร์โปรเจกต์เดียวเห็นงานทุกคน |
-| `student-first` | `Students/หัศดินทร์ ส่องสี/Project: UX Design Process/…` | ดูพัฒนาการรายคนตลอดคอร์ส |
+| `module-first` *(ค่าตั้งต้น)* | `Students/01 Project: UX Design Process/หัศดินทร์ ส่องสี/01-user-research-plan_หัศดินทร์.pdf` | **ตรวจงาน** — เปิดโฟลเดอร์โปรเจกต์เดียวเห็นงานทุกคน |
+| `student-first` | `Students/หัศดินทร์ ส่องสี/01 Project: UX Design Process/…` | ดูพัฒนาการรายคนตลอดคอร์ส |
 | `flat` | `Students/หัศดินทร์ ส่องสี/…` | คอร์สที่มีโมดูลเดียว |
 
 เปลี่ยนค่านี้ระหว่างคอร์ส **ไม่ย้ายไฟล์เก่าให้** ไฟล์ที่ส่งไปแล้วจะค้างอยู่โครงเดิม
@@ -284,7 +284,7 @@ Shared Drive ถ้าแอดเป็น group ก็จัดการที
 ```javascript
 'module-02': {
   title: 'Project: Research Methodology',
-  folderName: 'Project: Research Methodology',
+  folderName: '02 Project: Research Methodology',
   slots: [
     { id: '04', label: 'Interview Guide', filePrefix: '04-interview-guide' },
     { id: '05', label: 'Research Plan',   filePrefix: '05-research-plan' }
@@ -294,7 +294,9 @@ Shared Drive ถ้าแอดเป็น group ก็จัดการที
 
 - `title` เป็นทั้งชื่อแท็บเบราว์เซอร์และหัวข้อบนหน้าส่งงานตอนเปิดเป็นแท็บของตัวเอง
   (แบบฝัง iframe จะซ่อนหัวข้อไว้ เพราะหน้าบทเรียนมีของตัวเองแล้ว)
-- `folderName` คือชื่อโฟลเดอร์จริงใน Drive ตั้งให้ตรงกับ `title` ไปเลยจะหาง่ายที่สุด
+- `folderName` คือชื่อโฟลเดอร์จริงใน Drive **ต้องตรงกับชื่อโฟลเดอร์ที่มีอยู่เป๊ะ ๆ**
+  ถ้าไม่ตรงแม้แต่ตัวเดียว สคริปต์จะสร้างโฟลเดอร์ใหม่ซ้อนขึ้นมาอีกอันแทนที่จะใช้ของเดิม
+  เลขนำหน้ามีไว้บังคับลำดับ เพราะ Drive เรียงตามตัวอักษร ไม่ได้เรียงตามลำดับคอร์ส
 - `id` ควรไล่ต่อเนื่องข้ามโมดูล จะได้ไม่มีเลขนำหน้าไฟล์ซ้ำกันทั้งคอร์ส
 - จำนวน slot จะกี่ชิ้นก็ได้ หน้าเว็บสร้างช่องอัปโหลดตามที่ประกาศไว้
 
