@@ -3,6 +3,57 @@
  */
 
 /**
+ * ลบนักเรียนออกจาก Roster แล้วโยนโฟลเดอร์ของเขาลงถังขยะ
+ *
+ * ใช้ตอนทดสอบ หรือตอนที่นักเรียนพิมพ์ชื่อผิดตั้งแต่ครั้งแรกแล้วอยากเริ่มใหม่
+ * — พอลบแถวออก ครั้งหน้าที่เขากรอกอีเมลเดิม ระบบจะถามชื่อใหม่แล้วสร้างโฟลเดอร์ให้ใหม่
+ *
+ * ไฟล์ไม่ได้ถูกลบถาวร อยู่ใน Trash ของ Shared Drive 30 วัน กู้คืนได้
+ *
+ * วิธีใช้: แก้อีเมลในบรรทัดล่าง แล้วกด Run
+ */
+function forgetStudent() {
+  var email = 'PUT_EMAIL_HERE';
+
+  var key = normalizeId_(email);
+  if (!key || key === 'put_email_here') throw new Error('ใส่อีเมลที่ต้องการลบก่อน');
+
+  var student = findInRoster_(key);
+  if (!student) {
+    console.log('ไม่พบ %s ใน Roster (อาจลบไปแล้ว)', key);
+    return;
+  }
+
+  // ลบโฟลเดอร์ของเขาในทุกโมดูล
+  var trashed = [];
+  Object.keys(CONFIG.MODULES).forEach(function (moduleId) {
+    var folder = findSubmitFolder_(student, CONFIG.MODULES[moduleId]);
+    if (folder) {
+      folder.setTrashed(true);
+      trashed.push(moduleId);
+    }
+  });
+
+  // ลบแถวใน Roster
+  var sheet = getSheet_(CONFIG.ROSTER_TAB);
+  var values = sheet.getDataRange().getValues();
+  var headers = values[0].map(function (h) { return String(h).trim().toLowerCase(); });
+  var emailCol = headers.indexOf('email');
+  var codeCol = headers.indexOf('code');
+
+  for (var i = values.length - 1; i >= 1; i--) {
+    var rowEmail = normalizeId_(values[i][emailCol]);
+    var rowCode = codeCol === -1 ? '' : normalizeId_(values[i][codeCol]);
+    if (rowEmail === key || (rowCode && rowCode === key)) {
+      sheet.deleteRow(i + 1);
+    }
+  }
+
+  console.log('ลบ %s ออกจาก Roster แล้ว · โฟลเดอร์ที่ทิ้ง: %s',
+    key, trashed.join(', ') || '(ยังไม่เคยส่งงาน)');
+}
+
+/**
  * 1) สร้าง Google Sheet สำหรับ Roster + Log
  * รันครั้งเดียว แล้วเอา ID ที่ได้จาก log ไปใส่ CONFIG.ROSTER_SHEET_ID
  */
