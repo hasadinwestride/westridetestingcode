@@ -1,0 +1,59 @@
+<!--
+  แบบฝังในหน้าเลย (ไม่แนะนำเป็นค่าตั้งต้น — ดู embed-snippet.html แบบปุ่มก่อน)
+
+  ⚠️ ก่อนใช้ ต้องเช็กที่ตัว element ของ LMS ก่อน
+  element ชนิด "Embeddable script" มักบังคับสัดส่วนกล่องไว้ที่ Embed Options → Aspect Ratio
+  ถ้าตั้งเป็น Horizontal rectangle กล่องจะสูงตามสัดส่วนนั้นเสมอ ไม่ว่าเนื้อหาข้างในจะสูงแค่ไหน
+  ผลคือมีที่ว่างขาวใหญ่ ๆ ดันโจทย์ตกจอ ต้องเลือกสัดส่วนที่เตี้ยที่สุดที่มีให้ หรือถ้ามีตัวเลือก
+  ปรับความสูงเองก็ตั้งราว 200px แล้วปล่อยให้สคริปต์ด้านล่างขยายเอง
+
+  แก้ 2 อย่างต่อหน้า:
+    1. WEB_APP_URL  → URL /exec ที่ได้ตอน deploy (มีจุดเดียวแล้ว อยู่ใน iframe src)
+    2. module-01    → เลขโมดูลของบทเรียนนั้น
+
+  ใช้ deployment เดียวกันได้ทุกโมดูล ไม่ต้อง deploy ใหม่ต่อบทเรียน
+-->
+<div style="font-family:'Sarabun',system-ui,sans-serif;color:#0B1B3F;max-width:760px;margin:0 auto">
+
+  <div style="background:#fff;border:1px solid #E6EBF4;border-radius:16px;padding:20px 22px;margin:16px 0">
+    <div style="font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#667591;margin-bottom:12px">
+      <span style="display:inline-block;background:#0B1B3F;color:#fff;width:22px;height:22px;line-height:22px;text-align:center;border-radius:7px;font-size:13px;margin-right:8px">2</span>การส่งงาน
+    </div>
+
+    <div style="font-size:14.5px;line-height:1.7;margin-bottom:14px">
+      เซฟงานเป็นไฟล์ <b>PDF</b> แล้วอัปโหลดในช่องด้านล่างได้เลยครับ
+      <span style="color:#94A3B8">ไม่ต้องตั้งชื่อไฟล์เอง ระบบตั้งชื่อและจัดโฟลเดอร์ให้อัตโนมัติ
+      และงานของคุณจะเห็นได้เฉพาะคุณกับ Mentor เท่านั้น</span>
+    </div>
+
+    <iframe
+      id="westride-portal"
+      src="WEB_APP_URL?module=module-01"
+      title="ช่องส่งงาน"
+      style="width:100%;height:150px;border:0;display:block"></iframe>
+
+    <div style="background:#FEF3E2;border:1px solid #F6DBAE;border-radius:10px;padding:12px 14px;margin-top:14px">
+      <div style="color:#9A6200;font-size:13.5px;line-height:1.7">
+        📌 <b>ก่อนปิดหน้า</b> เช็กให้ทุกช่องขึ้น ✅ ส่งแล้ว —
+        Mentor จะเปิดดูงานจากระบบนี้เพื่อรีวิวในรอบ Live Meeting
+        ถ้าช่องไหนยังขึ้นว่า "ยังไม่ได้ส่ง" จะถือว่ายังส่งงานไม่ครบครับ
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ช่องส่งงานจะบอกความสูงจริงของตัวเองมา แล้วเราปรับ iframe ตาม
+  // เพื่อไม่ให้เหลือที่ว่างบังเนื้อหาด้านล่าง
+  // ถ้า LMS ตัด <script> ทิ้ง iframe จะคงความสูง 150px ซึ่งยังใช้กรอกอีเมลได้
+  // แล้วค่อยกลายเป็น scroll ภายในตอนเปิดช่องอัปโหลด
+  (function () {
+    window.addEventListener('message', function (e) {
+      var data = e.data;
+      if (!data || data.type !== 'westride-portal-height') return;
+      var frame = document.getElementById('westride-portal');
+      if (frame) frame.style.height = Math.max(120, data.height) + 'px';
+    });
+  })();
+</script>

@@ -17,6 +17,14 @@ var CONFIG = {
   ROSTER_TAB: 'Roster',
   LOG_TAB: 'SubmissionLog',
 
+  /**
+   * true  = ใครก็ส่งงานได้เลย ไม่ต้องแอดรายชื่อไว้ก่อน
+   *         นักเรียนกรอกชื่อ+อีเมลครั้งแรก ระบบเพิ่มเข้า Roster และสร้างโฟลเดอร์ให้เอง
+   *         ครั้งต่อไปกรอกอีเมลเดิม ระบบจำได้ว่าเป็นใคร
+   * false = ส่งได้เฉพาะคนที่มีชื่อใน Roster อยู่แล้ว
+   */
+  ALLOW_SELF_REGISTER: true,
+
   /** Google Group ของเมนเทอร์ ใช้แชร์โฟลเดอร์แม่ครั้งเดียว แล้วจัดการคนที่ group แทน */
   MENTOR_GROUP: 'uxui-mentors@we-stride.com',
 

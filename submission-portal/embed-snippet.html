@@ -1,11 +1,15 @@
 <!--
-  วางบล็อกนี้แทนหัวข้อ "การส่งงาน" ในหน้าบทเรียน
+  วิธีฝังที่แนะนำ: ปุ่มเปิดหน้าส่งงานในแท็บใหม่ ไม่มี iframe
+
+  ทำไมถึงแนะนำแบบนี้: ตัว element "Embeddable script" ของ LMS บังคับสัดส่วนกล่อง (Aspect Ratio)
+  ทำให้ต่อให้หน้าส่งงานสูงจริงแค่ 150px กล่องก็ยังกินพื้นที่เท่าสัดส่วนที่ตั้งไว้ แล้วดันโจทย์
+  ตกจอ ปุ่มไม่มีปัญหานี้เพราะเป็นข้อความธรรมดา สูงเท่าเนื้อหาจริงเสมอ
 
   แก้ 2 อย่างต่อหน้า:
-    1. WEB_APP_URL  → URL /exec ที่ได้ตอน deploy (มีจุดเดียวแล้ว อยู่ใน iframe src)
-    2. module-01    → เลขโมดูลของบทเรียนนั้น
+    1. WEB_APP_URL → URL /exec ที่ได้ตอน deploy
+    2. module-01   → เลขโมดูลของบทเรียนนั้น
 
-  ใช้ deployment เดียวกันได้ทุกโมดูล ไม่ต้อง deploy ใหม่ต่อบทเรียน
+  ถ้าอยากได้แบบฝังในหน้าเลย ดูไฟล์ embed-snippet-inline.html
 -->
 <div style="font-family:'Sarabun',system-ui,sans-serif;color:#0B1B3F;max-width:760px;margin:0 auto">
 
@@ -14,21 +18,24 @@
       <span style="display:inline-block;background:#0B1B3F;color:#fff;width:22px;height:22px;line-height:22px;text-align:center;border-radius:7px;font-size:13px;margin-right:8px">2</span>การส่งงาน
     </div>
 
-    <div style="font-size:14.5px;line-height:1.7;margin-bottom:14px">
-      เซฟงานเป็นไฟล์ <b>PDF</b> แล้วอัปโหลดในช่องด้านล่างได้เลยครับ
-      <span style="color:#94A3B8">ไม่ต้องตั้งชื่อไฟล์เอง ระบบตั้งชื่อและจัดโฟลเดอร์ให้อัตโนมัติ
+    <div style="font-size:14.5px;line-height:1.7;margin-bottom:16px">
+      เซฟงานเป็นไฟล์ <b>PDF</b> แล้วกดปุ่มด้านล่างเพื่อเปิดหน้าส่งงานครับ
+      <span style="color:#94A3B8">กรอกชื่อกับอีเมลครั้งเดียว แล้วลากไฟล์ลงช่องได้เลย
+      ไม่ต้องตั้งชื่อไฟล์เอง ระบบตั้งชื่อและจัดโฟลเดอร์ให้อัตโนมัติ
       และงานของคุณจะเห็นได้เฉพาะคุณกับ Mentor เท่านั้น</span>
     </div>
 
-    <iframe
-      id="westride-portal"
-      src="WEB_APP_URL?module=module-01"
-      title="ช่องส่งงาน"
-      style="width:100%;height:150px;border:0;display:block"></iframe>
+    <div style="text-align:center;margin-bottom:16px">
+      <a href="WEB_APP_URL?module=module-01" target="_blank" rel="noopener"
+         style="display:inline-block;background:#1D4ED8;color:#fff;text-decoration:none;font-size:15px;font-weight:700;padding:13px 30px;border-radius:10px">
+        📤 เปิดหน้าส่งงาน
+      </a>
+      <div style="font-size:12.5px;color:#94A3B8;margin-top:8px">เปิดในแท็บใหม่ ส่งเสร็จแล้วกลับมาหน้านี้ได้เลย</div>
+    </div>
 
-    <div style="background:#FEF3E2;border:1px solid #F6DBAE;border-radius:10px;padding:12px 14px;margin-top:14px">
+    <div style="background:#FEF3E2;border:1px solid #F6DBAE;border-radius:10px;padding:12px 14px">
       <div style="color:#9A6200;font-size:13.5px;line-height:1.7">
-        📌 <b>ก่อนปิดหน้า</b> เช็กให้ทุกช่องขึ้น ✅ ส่งแล้ว —
+        📌 <b>ก่อนปิดหน้าส่งงาน</b> เช็กให้ทุกช่องขึ้น ✅ ส่งแล้ว —
         Mentor จะเปิดดูงานจากระบบนี้เพื่อรีวิวในรอบ Live Meeting
         ถ้าช่องไหนยังขึ้นว่า "ยังไม่ได้ส่ง" จะถือว่ายังส่งงานไม่ครบครับ
       </div>
@@ -36,18 +43,3 @@
   </div>
 
 </div>
-
-<script>
-  // ช่องส่งงานจะบอกความสูงจริงของตัวเองมา แล้วเราปรับ iframe ตาม
-  // เพื่อไม่ให้เหลือที่ว่างบังเนื้อหาด้านล่าง
-  // ถ้า LMS ตัด <script> ทิ้ง iframe จะคงความสูง 150px ซึ่งยังใช้กรอกอีเมลได้
-  // แล้วค่อยกลายเป็น scroll ภายในตอนเปิดช่องอัปโหลด
-  (function () {
-    window.addEventListener('message', function (e) {
-      var data = e.data;
-      if (!data || data.type !== 'westride-portal-height') return;
-      var frame = document.getElementById('westride-portal');
-      if (frame) frame.style.height = Math.max(120, data.height) + 'px';
-    });
-  })();
-</script>

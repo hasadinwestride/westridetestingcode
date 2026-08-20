@@ -10,12 +10,9 @@ function setupPortal() {
   var ss = SpreadsheetApp.create('WeStride Submission Portal — Roster & Log');
 
   var roster = ss.getSheets()[0].setName(CONFIG.ROSTER_TAB);
-  roster.getRange(1, 1, 1, 5)
-    .setValues([['code', 'full_name', 'folder_name', 'file_tag', 'email']])
+  roster.getRange(1, 1, 1, 6)
+    .setValues([['code', 'full_name', 'folder_name', 'file_tag', 'email', 'registered_at']])
     .setFontWeight('bold');
-  roster.getRange(2, 1, 1, 5).setValues([
-    ['', 'Somchai Jaidee', 'Somchai-Jaidee', 'Somchai', 'somchai@example.com']
-  ]);
   roster.setFrozenRows(1);
 
   var log = ss.insertSheet(CONFIG.LOG_TAB);

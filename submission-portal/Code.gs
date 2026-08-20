@@ -26,10 +26,11 @@ function doGet(e) {
 // ------------------------------------------------------------ public API (client)
 
 /**
- * ตรวจว่าอีเมลอยู่ในรายชื่อไหม แล้วคืนสถานะการส่งงานของ "ตัวเองเท่านั้น"
+ * เปิดช่องส่งงาน แล้วคืนสถานะการส่งงานของ "ตัวเองเท่านั้น"
+ * ถ้าเป็นคนใหม่และเปิด ALLOW_SELF_REGISTER ไว้ ระบบจะเพิ่มเข้า Roster ให้เลย
  */
-function api_signIn(who, moduleId) {
-  var student = resolveStudent_(who);
+function api_signIn(who, fullName, moduleId) {
+  var student = resolveStudent_(who, fullName);
   return {
     fullName: student.fullName,
     folderName: student.folderName,
@@ -39,10 +40,10 @@ function api_signIn(who, moduleId) {
 
 /**
  * อัปโหลดไฟล์ 1 ชิ้นเข้า slot ที่ระบุ
- * payload: { who, moduleId, slotId, mimeType, sizeBytes, dataBase64 }
+ * payload: { who, fullName, moduleId, slotId, mimeType, sizeBytes, dataBase64 }
  */
 function api_upload(payload) {
-  var student = resolveStudent_(payload.who);
+  var student = resolveStudent_(payload.who, payload.fullName);
   var mod = getModule_(payload.moduleId);
   var slot = findSlot_(mod, payload.slotId);
 
@@ -86,10 +87,21 @@ function api_status(who, moduleId) {
  * Roster sheet ต้องมีหัวคอลัมน์: code | full_name | folder_name | file_tag | email
  * (code และ file_tag จะเว้นว่างก็ได้)
  */
-function resolveStudent_(identifier) {
+function resolveStudent_(identifier, fullNameInput) {
   var key = normalizeId_(identifier);
-  if (!key) throw new Error('กรุณากรอกอีเมลที่ใช้สมัครเรียน');
+  if (!key) throw new Error('กรุณากรอกอีเมลของคุณ');
 
+  var found = findInRoster_(key);
+  if (found) return found;
+
+  if (!CONFIG.ALLOW_SELF_REGISTER) {
+    console.warn('Rejected sign-in attempt: %s', key);
+    throw new Error('ไม่พบอีเมลนี้ในรายชื่อของคอร์ส ลองเช็กว่าพิมพ์ตรงกับอีเมลที่ใช้สมัครไหม หรือทักทีมงานได้เลยครับ');
+  }
+  return registerStudent_(key, fullNameInput);
+}
+
+function findInRoster_(key) {
   var rows = getRoster_();
   for (var i = 0; i < rows.length; i++) {
     var email = normalizeId_(rows[i].email);
@@ -97,7 +109,7 @@ function resolveStudent_(identifier) {
     if (key !== email && (!code || key !== code)) continue;
 
     var fullName = String(rows[i].full_name || '').trim();
-    if (!fullName) throw new Error('รายชื่อแถวนี้ยังไม่ได้ใส่ชื่อ กรุณาแจ้งทีมงาน');
+    if (!fullName) continue;
     var folderName = String(rows[i].folder_name || '').trim() || slugName_(fullName);
     var fileTag = String(rows[i].file_tag || '').trim() || firstToken_(folderName);
     return {
@@ -108,9 +120,76 @@ function resolveStudent_(identifier) {
       email: String(rows[i].email || '').trim()
     };
   }
+  return null;
+}
 
-  console.warn('Rejected sign-in attempt: %s', key);
-  throw new Error('ไม่พบอีเมลนี้ในรายชื่อของคอร์ส ลองเช็กว่าพิมพ์ตรงกับอีเมลที่ใช้สมัครไหม หรือทักทีมงานได้เลยครับ');
+/**
+ * เพิ่มนักเรียนหน้าใหม่เข้า Roster เอง
+ *
+ * อีเมลเป็นตัวชี้ขาดว่าเป็นใคร ครั้งต่อไปที่กรอกอีเมลเดิม ระบบจะเจอแถวนี้และใช้
+ * โฟลเดอร์เดิมเสมอ ต่อให้พิมพ์ชื่อไม่เหมือนเดิม จึงไม่เกิดโฟลเดอร์ซ้ำจากการพิมพ์คลาดเคลื่อน
+ */
+function registerStudent_(email, fullNameInput) {
+  var fullName = sanitizeName_(String(fullNameInput || '')).slice(0, 60);
+  if (fullName.replace(/[^A-Za-zก-๙]/g, '').length < 2) {
+    throw new Error('กรุณากรอกชื่อ-นามสกุลของคุณด้วย ระบบใช้ตั้งชื่อโฟลเดอร์ให้');
+  }
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    // เช็กอีกรอบหลังได้ lock เผื่อกดพร้อมกันหลายแท็บ
+    var existing = findInRoster_(email);
+    if (existing) return existing;
+
+    var folderName = uniqueFolderName_(slugName_(fullName));
+    var fileTag = firstToken_(folderName);
+
+    appendRosterRow_({
+      code: '',
+      full_name: fullName,
+      folder_name: folderName,
+      file_tag: fileTag,
+      email: email,
+      registered_at: new Date()
+    });
+
+    console.log('Self-registered: %s → %s', email, folderName);
+    return {
+      key: email,
+      fullName: fullName,
+      folderName: folderName,
+      fileTag: fileTag,
+      email: email
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/** กันกรณีชื่อซ้ำกันจริง ๆ ระหว่างนักเรียนคนละคน */
+function uniqueFolderName_(base) {
+  var taken = {};
+  getRoster_().forEach(function (row) {
+    var name = String(row.folder_name || '').trim().toLowerCase();
+    if (name) taken[name] = true;
+  });
+
+  if (!taken[base.toLowerCase()]) return base;
+  for (var n = 2; n < 100; n++) {
+    if (!taken[(base + '-' + n).toLowerCase()]) return base + '-' + n;
+  }
+  return base + '-' + Date.now();
+}
+
+/** เขียนแถวใหม่โดยอ้างชื่อคอลัมน์ ไม่ยึดลำดับ เผื่อมีคนสลับคอลัมน์ในชีต */
+function appendRosterRow_(values) {
+  var sheet = getSheet_(CONFIG.ROSTER_TAB);
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
+    .map(function (h) { return String(h).trim().toLowerCase().replace(/\s+/g, '_'); });
+  sheet.appendRow(headers.map(function (h) {
+    return values[h] === undefined ? '' : values[h];
+  }));
 }
 
 function getRoster_() {

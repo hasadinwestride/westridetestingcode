@@ -26,18 +26,19 @@
   .wrap { max-width: 720px; margin: 0 auto; padding: 2px 2px 6px; }
 
   .card { background: var(--tint); border-radius: 14px; padding: 14px 16px; }
-  .field { display: block; font-size: 14px; font-weight: 700; margin-bottom: 7px; }
   .row { display: flex; gap: 8px; flex-wrap: wrap; }
-  input[type=email] {
-    flex: 1 1 240px;
+  input {
+    flex: 1 1 200px;
+    min-width: 0;
     font: inherit;
-    padding: 10px 13px;
+    font-size: 14px;
+    padding: 10px 12px;
     border: 1px solid var(--line);
     border-radius: 9px;
     background: #fff;
     color: var(--ink);
   }
-  input[type=email]:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
 
   button {
     font: inherit;
@@ -89,12 +90,14 @@
 
   <div id="signin">
     <div class="card">
-      <label class="field" for="who">อีเมลที่ใช้สมัครเรียน</label>
       <div class="row">
-        <input type="email" id="who" autocomplete="email" spellcheck="false" placeholder="you@example.com">
+        <input type="text" id="name" autocomplete="name" spellcheck="false"
+               placeholder="ชื่อ-นามสกุล (อังกฤษ) เช่น Somchai Jaidee">
+        <input type="email" id="who" autocomplete="email" spellcheck="false"
+               placeholder="อีเมลของคุณ">
         <button id="btnSignin">เปิดช่องส่งงาน</button>
       </div>
-      <p class="hint" id="signinMsg">ใช้เพื่อบอกระบบว่าเป็นงานของใคร จะได้เก็บเข้าโฟลเดอร์ให้ถูกคน</p>
+      <p class="hint" id="signinMsg">ครั้งแรกกรอกทั้งสองช่อง ครั้งต่อไปกรอกแค่อีเมลเดิม ระบบจำได้เอง</p>
     </div>
   </div>
 
@@ -140,16 +143,19 @@
   // ---------------------------------------------------------------- sign in
 
   el('btnSignin').addEventListener('click', signIn);
-  el('who').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') signIn();
+  ['name', 'who'].forEach(function (id) {
+    el(id).addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') signIn();
+    });
   });
 
   function signIn() {
     var who = el('who').value.trim();
-    if (!who) return;
+    var name = el('name').value.trim();
+    if (!who) return setHint('กรอกอีเมลของคุณด้วยครับ', true);
 
     el('btnSignin').disabled = true;
-    setHint('กำลังตรวจสอบ…', false);
+    setHint('กำลังเปิดช่องส่งงาน…', false);
 
     google.script.run
       .withSuccessHandler(function (res) {
@@ -161,7 +167,7 @@
         el('btnSignin').disabled = false;
         setHint(err.message || 'เปิดช่องส่งงานไม่สำเร็จ', true);
       })
-      .api_signIn(who, MODULE_ID);
+      .api_signIn(who, name, MODULE_ID);
   }
 
   function setHint(msg, isBad) {
@@ -173,7 +179,8 @@
   el('btnSignout').addEventListener('click', function () {
     session = null;
     el('who').value = '';
-    setHint('ใช้เพื่อบอกระบบว่าเป็นงานของใคร จะได้เก็บเข้าโฟลเดอร์ให้ถูกคน', false);
+    el('name').value = '';
+    setHint('ครั้งแรกกรอกทั้งสองช่อง ครั้งต่อไปกรอกแค่อีเมลเดิม ระบบจำได้เอง', false);
     el('portal').classList.add('hidden');
     el('signin').classList.remove('hidden');
     postHeight();
@@ -292,6 +299,7 @@
         })
         .api_upload({
           who: session.who,
+          fullName: session.fullName,
           moduleId: MODULE_ID,
           slotId: slot.id,
           mimeType: file.type,
