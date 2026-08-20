@@ -26,10 +26,10 @@ function doGet(e) {
 // ------------------------------------------------------------ public API (client)
 
 /**
- * ตรวจรหัสของนักเรียน แล้วคืนสถานะการส่งงานของ "ตัวเองเท่านั้น"
+ * ตรวจว่าอีเมลอยู่ในรายชื่อไหม แล้วคืนสถานะการส่งงานของ "ตัวเองเท่านั้น"
  */
-function api_signIn(code, moduleId) {
-  var student = resolveStudent_(code);
+function api_signIn(who, moduleId) {
+  var student = resolveStudent_(who);
   return {
     fullName: student.fullName,
     folderName: student.folderName,
@@ -39,10 +39,10 @@ function api_signIn(code, moduleId) {
 
 /**
  * อัปโหลดไฟล์ 1 ชิ้นเข้า slot ที่ระบุ
- * payload: { code, moduleId, slotId, mimeType, sizeBytes, dataBase64 }
+ * payload: { who, moduleId, slotId, mimeType, sizeBytes, dataBase64 }
  */
 function api_upload(payload) {
-  var student = resolveStudent_(payload.code);
+  var student = resolveStudent_(payload.who);
   var mod = getModule_(payload.moduleId);
   var slot = findSlot_(mod, payload.slotId);
 
@@ -70,42 +70,47 @@ function api_upload(payload) {
   };
 }
 
-function api_status(code, moduleId) {
-  var student = resolveStudent_(code);
+function api_status(who, moduleId) {
+  var student = resolveStudent_(who);
   return readSubmissions_(student, getModule_(moduleId));
 }
 
 // ------------------------------------------------------------------- identity
 
 /**
- * หา นักเรียน จากรหัสใน Roster
+ * หานักเรียนใน Roster จากอีเมลที่ใช้สมัครเรียน
+ *
+ * รับรหัสในคอลัมน์ code ได้ด้วย เผื่อคนที่อยากใช้รหัสแทนอีเมล
+ * แต่ค่าปกติของหน้าเว็บคือถามอีเมล เพราะนักเรียนจำได้อยู่แล้วไม่ต้องแจกอะไรเพิ่ม
  *
  * Roster sheet ต้องมีหัวคอลัมน์: code | full_name | folder_name | file_tag | email
- * (file_tag และ email จะเว้นว่างก็ได้)
+ * (code และ file_tag จะเว้นว่างก็ได้)
  */
-function resolveStudent_(code) {
-  var key = normalizeCode_(code);
-  if (!key) throw new Error('กรุณากรอกรหัสนักเรียน');
+function resolveStudent_(identifier) {
+  var key = normalizeId_(identifier);
+  if (!key) throw new Error('กรุณากรอกอีเมลที่ใช้สมัครเรียน');
 
   var rows = getRoster_();
   for (var i = 0; i < rows.length; i++) {
-    if (normalizeCode_(rows[i].code) === key) {
-      var fullName = String(rows[i].full_name || '').trim();
-      if (!fullName) throw new Error('Roster แถวนี้ยังไม่ได้ใส่ชื่อ กรุณาแจ้งทีมงาน');
-      var folderName = String(rows[i].folder_name || '').trim() || slugName_(fullName);
-      var fileTag = String(rows[i].file_tag || '').trim() || firstToken_(folderName);
-      return {
-        code: key,
-        fullName: fullName,
-        folderName: sanitizeName_(folderName),
-        fileTag: sanitizeName_(fileTag),
-        email: String(rows[i].email || '').trim()
-      };
-    }
+    var email = normalizeId_(rows[i].email);
+    var code = normalizeId_(rows[i].code);
+    if (key !== email && (!code || key !== code)) continue;
+
+    var fullName = String(rows[i].full_name || '').trim();
+    if (!fullName) throw new Error('รายชื่อแถวนี้ยังไม่ได้ใส่ชื่อ กรุณาแจ้งทีมงาน');
+    var folderName = String(rows[i].folder_name || '').trim() || slugName_(fullName);
+    var fileTag = String(rows[i].file_tag || '').trim() || firstToken_(folderName);
+    return {
+      key: key,
+      fullName: fullName,
+      folderName: sanitizeName_(folderName),
+      fileTag: sanitizeName_(fileTag),
+      email: String(rows[i].email || '').trim()
+    };
   }
 
-  console.warn('Rejected sign-in attempt with code: %s', key);
-  throw new Error('ไม่พบรหัสนี้ในระบบ กรุณาตรวจสอบอีกครั้งหรือทักทีมงาน');
+  console.warn('Rejected sign-in attempt: %s', key);
+  throw new Error('ไม่พบอีเมลนี้ในรายชื่อของคอร์ส ลองเช็กว่าพิมพ์ตรงกับอีเมลที่ใช้สมัครไหม หรือทักทีมงานได้เลยครับ');
 }
 
 function getRoster_() {
@@ -234,6 +239,11 @@ function firstToken_(value) {
 
 function normalizeCode_(code) {
   return String(code == null ? '' : code).trim().toUpperCase();
+}
+
+/** ใช้เทียบอีเมลและรหัสแบบไม่สนตัวพิมพ์ใหญ่เล็กและช่องว่างหัวท้าย */
+function normalizeId_(value) {
+  return String(value == null ? '' : value).trim().toLowerCase();
 }
 
 function formatDate_(date) {

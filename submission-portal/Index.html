@@ -12,80 +12,75 @@
     --line: #E6EBF4;
     --tint: #EEF3FF;
     --ok: #0F8A50;
+    --err: #C22B2B;
     --warn: #9A6200;
   }
   * { box-sizing: border-box; }
+  html, body { margin: 0; }
   body {
-    margin: 0;
     font-family: 'Sarabun', system-ui, -apple-system, sans-serif;
     color: var(--ink);
-    line-height: 1.6;
+    line-height: 1.55;
     background: #fff;
   }
-  .wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 32px; }
-  .head { font-size: 20px; font-weight: 800; margin: 0 0 4px; }
-  .sub { font-size: 14px; color: var(--muted); margin: 0 0 18px; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 2px 2px 6px; }
 
-  .card { background: var(--tint); border-radius: 16px; padding: 20px 22px; }
-  .field { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-  .row { display: flex; gap: 10px; flex-wrap: wrap; }
-  input[type=text] {
-    flex: 1 1 220px;
+  .card { background: var(--tint); border-radius: 14px; padding: 14px 16px; }
+  .field { display: block; font-size: 14px; font-weight: 700; margin-bottom: 7px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  input[type=email] {
+    flex: 1 1 240px;
     font: inherit;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 11px 14px;
+    padding: 10px 13px;
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 9px;
     background: #fff;
     color: var(--ink);
   }
-  input[type=text]:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  input[type=email]:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
 
   button {
     font: inherit;
     font-weight: 700;
-    padding: 11px 22px;
+    padding: 10px 20px;
     border: 0;
-    border-radius: 10px;
+    border-radius: 9px;
     background: var(--brand);
     color: #fff;
     cursor: pointer;
   }
   button:disabled { opacity: .55; cursor: not-allowed; }
-  button.ghost { background: #fff; color: var(--brand); border: 1px solid var(--line); }
+  button.ghost {
+    background: #fff; color: var(--muted);
+    border: 1px solid var(--line); padding: 6px 14px; font-weight: 600; font-size: 13px;
+  }
 
-  .hint { font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .hint { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+  .hint.bad { color: var(--err); }
 
   .who {
     display: flex; justify-content: space-between; align-items: center; gap: 12px;
-    background: var(--tint); border-radius: 12px; padding: 12px 16px; margin-bottom: 14px;
+    background: var(--tint); border-radius: 10px; padding: 8px 14px; margin-bottom: 10px;
   }
-  .who b { font-size: 15px; }
-  .who small { display: block; color: var(--muted); font-size: 13px; }
+  .who b { font-size: 14.5px; }
 
   .slot {
     background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--brand);
-    border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
+    border-radius: 10px; padding: 11px 14px; margin-bottom: 8px;
   }
-  .slot h3 { font-size: 15px; margin: 0 0 2px; }
-  .slot .fname { font-family: ui-monospace, monospace; font-size: 12.5px; color: var(--muted); }
-  .slot .state { font-size: 13px; margin-top: 8px; }
+  .slot h3 { font-size: 14.5px; margin: 0; }
+  .slot .state { font-size: 13px; margin-top: 4px; }
   .slot .state.done { color: var(--ok); font-weight: 700; }
-  .slot .state.err { color: #C22B2B; font-weight: 700; }
-  .slot .actions { margin-top: 10px; }
+  .slot .state.err { color: var(--err); font-weight: 700; }
   .slot.busy { opacity: .6; pointer-events: none; }
 
   .drop {
-    border: 1.5px dashed var(--line); border-radius: 10px; padding: 14px;
-    text-align: center; font-size: 13.5px; color: var(--muted); cursor: pointer;
+    border: 1.5px dashed var(--line); border-radius: 9px; padding: 9px;
+    margin-top: 8px; text-align: center; font-size: 13px; color: var(--muted); cursor: pointer;
   }
   .drop.over { border-color: var(--brand); background: var(--tint); color: var(--brand); }
 
-  .note {
-    background: #FEF3E2; border: 1px solid #F6DBAE; border-radius: 10px;
-    padding: 12px 14px; color: var(--warn); font-size: 13.5px; margin-top: 16px;
-  }
+  .foot { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
   .hidden { display: none; }
 </style>
 </head>
@@ -93,30 +88,24 @@
 <div class="wrap">
 
   <div id="signin">
-    <p class="head">ส่งงาน <?= moduleTitle ?></p>
-    <p class="sub">กรอกรหัสนักเรียนของคุณเพื่อเปิดช่องอัปโหลด งานของคุณจะถูกเก็บในโฟลเดอร์ส่วนตัว มีแค่คุณกับเมนเทอร์ที่เห็น</p>
     <div class="card">
-      <label class="field" for="code">รหัสนักเรียน</label>
+      <label class="field" for="who">อีเมลที่ใช้สมัครเรียน</label>
       <div class="row">
-        <input type="text" id="code" autocomplete="off" spellcheck="false" placeholder="เช่น K7M2XQ9RTB">
-        <button id="btnSignin">เข้าสู่ระบบ</button>
+        <input type="email" id="who" autocomplete="email" spellcheck="false" placeholder="you@example.com">
+        <button id="btnSignin">เปิดช่องส่งงาน</button>
       </div>
-      <p class="hint" id="signinMsg">รหัสถูกส่งให้ทางอีเมลตอนเริ่มคอร์ส หาไม่เจอทักทีมงานได้เลยครับ</p>
+      <p class="hint" id="signinMsg">ใช้เพื่อบอกระบบว่าเป็นงานของใคร จะได้เก็บเข้าโฟลเดอร์ให้ถูกคน</p>
     </div>
   </div>
 
   <div id="portal" class="hidden">
     <div class="who">
-      <div>
-        <b id="whoName"></b>
-        <small id="whoFolder"></small>
-      </div>
-      <button class="ghost" id="btnSignout">ออก</button>
+      <b id="whoName"></b>
+      <button class="ghost" id="btnSignout">ไม่ใช่คุณ?</button>
     </div>
     <div id="slots"></div>
-    <div class="note">
-      รับเฉพาะไฟล์ PDF ขนาดไม่เกิน <?= maxFileMb ?>MB ต่อชิ้น · ระบบตั้งชื่อไฟล์และจัดโฟลเดอร์ให้อัตโนมัติ
-      · ส่งซ้ำได้ไม่จำกัด ระบบจะเก็บไฟล์ล่าสุดไว้ให้เมนเทอร์ตรวจ
+    <div class="foot">
+      PDF ไม่เกิน <?= maxFileMb ?>MB ต่อชิ้น · ระบบตั้งชื่อไฟล์ให้อัตโนมัติ · ส่งซ้ำได้ ระบบเก็บไฟล์ล่าสุดไว้ตรวจ
     </div>
   </div>
 
@@ -132,52 +121,68 @@
 
   var el = function (id) { return document.getElementById(id); };
 
+  // ----------------------------------------------------------- iframe height
+
+  // หน้านี้ถูกฝังใน LMS ผ่าน iframe และ Apps Script ยังซ้อน iframe ให้อีกชั้น
+  // window.top จึงเป็นหน้าบทเรียนจริง ส่วน parent เป็นตัวห่อของ Apps Script
+  function postHeight() {
+    var h = Math.ceil(document.documentElement.getBoundingClientRect().height) + 4;
+    var msg = { type: 'westride-portal-height', height: h };
+    try { window.parent.postMessage(msg, '*'); } catch (e) {}
+    try { if (window.top !== window.parent) window.top.postMessage(msg, '*'); } catch (e) {}
+  }
+
+  window.addEventListener('load', postHeight);
+  if (window.ResizeObserver) {
+    new ResizeObserver(postHeight).observe(document.documentElement);
+  }
+
   // ---------------------------------------------------------------- sign in
 
   el('btnSignin').addEventListener('click', signIn);
-  el('code').addEventListener('keydown', function (e) {
+  el('who').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') signIn();
   });
 
   function signIn() {
-    var code = el('code').value.trim();
-    if (!code) return;
+    var who = el('who').value.trim();
+    if (!who) return;
 
-    setSigninBusy(true, 'กำลังตรวจสอบ…');
+    el('btnSignin').disabled = true;
+    setHint('กำลังตรวจสอบ…', false);
+
     google.script.run
       .withSuccessHandler(function (res) {
-        session = { code: code, fullName: res.fullName, folderName: res.folderName };
-        setSigninBusy(false, '');
+        session = { who: who, fullName: res.fullName, folderName: res.folderName };
+        el('btnSignin').disabled = false;
         showPortal(res.submissions || {});
       })
       .withFailureHandler(function (err) {
-        setSigninBusy(false, err.message || 'เข้าสู่ระบบไม่สำเร็จ');
-        el('signinMsg').style.color = '#C22B2B';
+        el('btnSignin').disabled = false;
+        setHint(err.message || 'เปิดช่องส่งงานไม่สำเร็จ', true);
       })
-      .api_signIn(code, MODULE_ID);
+      .api_signIn(who, MODULE_ID);
   }
 
-  function setSigninBusy(busy, msg) {
-    el('btnSignin').disabled = busy;
-    if (msg) { el('signinMsg').textContent = msg; }
-    if (!busy && !msg) { el('signinMsg').style.color = ''; }
+  function setHint(msg, isBad) {
+    var hint = el('signinMsg');
+    hint.textContent = msg;
+    hint.className = isBad ? 'hint bad' : 'hint';
   }
 
-  function signOut() {
+  el('btnSignout').addEventListener('click', function () {
     session = null;
-    el('code').value = '';
-    el('signinMsg').textContent = 'รหัสถูกส่งให้ทางอีเมลตอนเริ่มคอร์ส หาไม่เจอทักทีมงานได้เลยครับ';
-    el('signinMsg').style.color = '';
+    el('who').value = '';
+    setHint('ใช้เพื่อบอกระบบว่าเป็นงานของใคร จะได้เก็บเข้าโฟลเดอร์ให้ถูกคน', false);
     el('portal').classList.add('hidden');
     el('signin').classList.remove('hidden');
-  }
-  el('btnSignout').addEventListener('click', signOut);
+    postHeight();
+  });
 
   // ------------------------------------------------------------------ portal
 
   function showPortal(submissions) {
     el('whoName').textContent = session.fullName;
-    el('whoFolder').textContent = 'โฟลเดอร์ของคุณ: ' + session.folderName;
     el('signin').classList.add('hidden');
     el('portal').classList.remove('hidden');
 
@@ -186,6 +191,7 @@
     SLOTS.forEach(function (slot) {
       container.appendChild(buildSlot(slot, submissions[slot.id]));
     });
+    postHeight();
   }
 
   function buildSlot(slot, submitted) {
@@ -194,11 +200,7 @@
     card.id = 'slot-' + slot.id;
 
     var title = document.createElement('h3');
-    title.textContent = slot.id + ' · ' + slot.label;
-
-    var fname = document.createElement('div');
-    fname.className = 'fname';
-    fname.textContent = slot.filePrefix + '_<ชื่อคุณ>.pdf';
+    title.textContent = slot.label;
 
     var state = document.createElement('div');
     state.className = 'state';
@@ -234,15 +236,10 @@
       if (file) upload(slot, file);
     });
 
-    var actions = document.createElement('div');
-    actions.className = 'actions';
-    actions.appendChild(drop);
-
     card.appendChild(title);
-    card.appendChild(fname);
     card.appendChild(state);
     card.appendChild(input);
-    card.appendChild(actions);
+    card.appendChild(drop);
 
     renderState(slot.id, submitted);
     return card;
@@ -253,7 +250,7 @@
     if (!state) return;
     if (submitted) {
       state.className = 'state done';
-      state.textContent = '✅ ส่งแล้ว · ' + submitted.fileName + ' · ' + submitted.submittedAt;
+      state.textContent = '✅ ส่งแล้ว · ' + submitted.submittedAt;
     } else {
       state.className = 'state';
       state.textContent = 'ยังไม่ได้ส่ง';
@@ -294,7 +291,7 @@
           fail(state, err.message || 'อัปโหลดไม่สำเร็จ');
         })
         .api_upload({
-          code: session.code,
+          who: session.who,
           moduleId: MODULE_ID,
           slotId: slot.id,
           mimeType: file.type,

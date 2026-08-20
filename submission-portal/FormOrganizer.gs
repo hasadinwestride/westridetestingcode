@@ -51,22 +51,9 @@ function onFormSubmitOrganize(e) {
 }
 
 function findStudentByEmail_(email) {
-  if (!email) return null;
-  var key = email.toLowerCase();
-
-  var rows = getRoster_();
-  for (var i = 0; i < rows.length; i++) {
-    if (String(rows[i].email || '').trim().toLowerCase() !== key) continue;
-
-    var fullName = String(rows[i].full_name || '').trim();
-    if (!fullName) return null;
-    var folderName = String(rows[i].folder_name || '').trim() || slugName_(fullName);
-    return {
-      fullName: fullName,
-      folderName: sanitizeName_(folderName),
-      fileTag: sanitizeName_(String(rows[i].file_tag || '').trim() || firstToken_(folderName)),
-      email: email
-    };
+  try {
+    return resolveStudent_(email);
+  } catch (err) {
+    return null;
   }
-  return null;
 }
