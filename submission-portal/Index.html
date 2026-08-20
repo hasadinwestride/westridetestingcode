@@ -92,7 +92,7 @@
     <div class="card">
       <div class="row">
         <input type="text" id="name" autocomplete="name" spellcheck="false"
-               placeholder="ชื่อ-นามสกุล (อังกฤษ) เช่น Somchai Jaidee">
+               placeholder="ชื่อ-นามสกุล เช่น หัศดินทร์ ส่องสี">
         <input type="email" id="who" autocomplete="email" spellcheck="false"
                placeholder="อีเมลของคุณ">
         <button id="btnSignin">เปิดช่องส่งงาน</button>
@@ -167,7 +167,7 @@
         el('btnSignin').disabled = false;
         setHint(err.message || 'เปิดช่องส่งงานไม่สำเร็จ', true);
       })
-      .api_signIn(who, name, MODULE_ID);
+      .api_signIn({ who: who, fullName: name, moduleId: MODULE_ID });
   }
 
   function setHint(msg, isBad) {

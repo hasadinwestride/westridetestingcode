@@ -28,14 +28,27 @@ function doGet(e) {
 /**
  * เปิดช่องส่งงาน แล้วคืนสถานะการส่งงานของ "ตัวเองเท่านั้น"
  * ถ้าเป็นคนใหม่และเปิด ALLOW_SELF_REGISTER ไว้ ระบบจะเพิ่มเข้า Roster ให้เลย
+ *
+ * payload: { who, fullName, moduleId }
+ *
+ * รับเป็น object ไม่ใช่ argument เรียงกัน เพราะถ้า Index.html ที่ deploy อยู่เป็นเวอร์ชันเก่า
+ * กว่าไฟล์นี้ การเรียงลำดับจะเลื่อน แล้วค่าอย่าง moduleId จะไหลไปตกในช่องชื่อนักเรียน
+ * กลายเป็นโฟลเดอร์ชื่อ "module-01" โดยไม่มีใครรู้ตัว object ทำให้ผิดพลาดแบบนั้นไม่ได้
  */
-function api_signIn(who, fullName, moduleId) {
-  var student = resolveStudent_(who, fullName);
+function api_signIn(payload) {
+  assertModernClient_(payload);
+  var student = resolveStudent_(payload.who, payload.fullName);
   return {
     fullName: student.fullName,
     folderName: student.folderName,
-    submissions: readSubmissions_(student, getModule_(moduleId))
+    submissions: readSubmissions_(student, getModule_(payload.moduleId))
   };
+}
+
+function assertModernClient_(payload) {
+  if (!payload || typeof payload !== 'object') {
+    throw new Error('หน้าส่งงานเป็นเวอร์ชันเก่ากว่าสคริปต์ กรุณาอัปเดต Index.html แล้ว Deploy version ใหม่');
+  }
 }
 
 /**
@@ -43,6 +56,7 @@ function api_signIn(who, fullName, moduleId) {
  * payload: { who, fullName, moduleId, slotId, mimeType, sizeBytes, dataBase64 }
  */
 function api_upload(payload) {
+  assertModernClient_(payload);
   var student = resolveStudent_(payload.who, payload.fullName);
   var mod = getModule_(payload.moduleId);
   var slot = findSlot_(mod, payload.slotId);
@@ -110,7 +124,7 @@ function findInRoster_(key) {
 
     var fullName = String(rows[i].full_name || '').trim();
     if (!fullName) continue;
-    var folderName = String(rows[i].folder_name || '').trim() || slugName_(fullName);
+    var folderName = String(rows[i].folder_name || '').trim() || sanitizeName_(fullName);
     var fileTag = String(rows[i].file_tag || '').trim() || firstToken_(folderName);
     return {
       key: key,
@@ -142,7 +156,7 @@ function registerStudent_(email, fullNameInput) {
     var existing = findInRoster_(email);
     if (existing) return existing;
 
-    var folderName = uniqueFolderName_(slugName_(fullName));
+    var folderName = uniqueFolderName_(sanitizeName_(fullName));
     var fileTag = firstToken_(folderName);
 
     appendRosterRow_({
@@ -211,6 +225,17 @@ function getRoster_() {
 // -------------------------------------------------------------------- storage
 
 /**
+ * ลำดับโฟลเดอร์นับจาก ROOT_FOLDER_ID ลงไป ตาม CONFIG.FOLDER_LAYOUT
+ */
+function folderPath_(student, mod) {
+  switch (CONFIG.FOLDER_LAYOUT) {
+    case 'flat': return [student.folderName];
+    case 'student-first': return [student.folderName, mod.folderName];
+    default: return [mod.folderName, student.folderName];
+  }
+}
+
+/**
  * โฟลเดอร์ปลายทางของนักเรียน สร้างให้อัตโนมัติถ้ายังไม่มี
  * ใช้ LockService กันกรณีนักเรียนกดส่งหลายไฟล์พร้อมกันแล้วเกิดโฟลเดอร์ซ้ำ
  */
@@ -218,15 +243,26 @@ function getSubmitFolder_(student, mod) {
   var lock = LockService.getScriptLock();
   lock.waitLock(30000);
   try {
-    var root = DriveApp.getFolderById(CONFIG.ROOT_FOLDER_ID);
-    var folder = getOrCreateChild_(root, student.folderName);
-    if (CONFIG.USE_MODULE_SUBFOLDER) {
-      folder = getOrCreateChild_(folder, mod.folderName);
-    }
+    var folder = DriveApp.getFolderById(CONFIG.ROOT_FOLDER_ID);
+    folderPath_(student, mod).forEach(function (name) {
+      folder = getOrCreateChild_(folder, name);
+    });
     return folder;
   } finally {
     lock.releaseLock();
   }
+}
+
+/** เหมือน getSubmitFolder_ แต่ไม่สร้างอะไรเลย คืน null ถ้ายังไม่เคยส่งงาน */
+function findSubmitFolder_(student, mod) {
+  var folder = DriveApp.getFolderById(CONFIG.ROOT_FOLDER_ID);
+  var path = folderPath_(student, mod);
+  for (var i = 0; i < path.length; i++) {
+    var it = folder.getFoldersByName(path[i]);
+    if (!it.hasNext()) return null;
+    folder = it.next();
+  }
+  return folder;
 }
 
 function getOrCreateChild_(parent, name) {
@@ -256,16 +292,8 @@ function archiveExisting_(folder, fileName) {
 }
 
 function readSubmissions_(student, mod) {
-  var root = DriveApp.getFolderById(CONFIG.ROOT_FOLDER_ID);
-  var it = root.getFoldersByName(student.folderName);
-  if (!it.hasNext()) return {};
-
-  var folder = it.next();
-  if (CONFIG.USE_MODULE_SUBFOLDER) {
-    var sub = folder.getFoldersByName(mod.folderName);
-    if (!sub.hasNext()) return {};
-    folder = sub.next();
-  }
+  var folder = findSubmitFolder_(student, mod);
+  if (!folder) return {};
 
   var result = {};
   mod.slots.forEach(function (slot) {
@@ -308,9 +336,6 @@ function sanitizeName_(value) {
   return String(value).replace(/[\/\\:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
 }
 
-function slugName_(fullName) {
-  return sanitizeName_(fullName).replace(/\s+/g, '-');
-}
 
 function firstToken_(value) {
   return String(value).split(/[\s\-_]+/)[0] || String(value);
