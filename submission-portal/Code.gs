@@ -18,6 +18,10 @@ function doGet(e) {
   t.slots = mod.slots;
   t.maxFileMb = CONFIG.MAX_FILE_MB;
 
+  // ?embed=1 มาจาก embed-snippet-inline.html — ตัดหัวข้อกับกรอบออกเพราะหน้าบทเรียนมีให้แล้ว
+  // ถ้าไม่มีพารามิเตอร์ แปลว่าเปิดเป็นแท็บของตัวเอง จึงจัดหน้าให้อยู่กลางจอและมีหัวข้อบอกว่าอยู่ที่ไหน
+  t.embed = !!(e && e.parameter && e.parameter.embed);
+
   return t.evaluate()
     .setTitle('ส่งงาน — ' + mod.title)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);

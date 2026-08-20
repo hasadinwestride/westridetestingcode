@@ -25,6 +25,31 @@
   }
   .wrap { max-width: 720px; margin: 0 auto; padding: 2px 2px 6px; }
 
+  /* เปิดเป็นแท็บของตัวเอง — จัดให้อยู่กลางจอ มีหัวข้อบอกว่าหน้านี้คืออะไร */
+  body.standalone { background: #F4F7FC; }
+  body.standalone .wrap {
+    max-width: 620px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  body.standalone .panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px 24px;
+    box-shadow: 0 2px 10px rgba(11, 27, 63, .06);
+  }
+  .head { margin-bottom: 16px; }
+  .head .eyebrow {
+    font-size: 12px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--brand);
+  }
+  .head h1 { font-size: 22px; font-weight: 800; margin: 4px 0 0; line-height: 1.4; }
+  body.embed .head { display: none; }
+
   .card { background: var(--tint); border-radius: 14px; padding: 14px 16px; }
   .row { display: flex; gap: 8px; flex-wrap: wrap; }
   input {
@@ -85,8 +110,15 @@
   .hidden { display: none; }
 </style>
 </head>
-<body>
+<body class="<?= embed ? 'embed' : 'standalone' ?>">
 <div class="wrap">
+
+ <div class="panel">
+
+  <div class="head">
+    <div class="eyebrow">ส่งงาน</div>
+    <h1><?= moduleTitle ?></h1>
+  </div>
 
   <div id="signin">
     <div class="card">
@@ -111,6 +143,8 @@
       PDF ไม่เกิน <?= maxFileMb ?>MB ต่อชิ้น · ระบบตั้งชื่อไฟล์ให้อัตโนมัติ · ส่งซ้ำได้ ระบบเก็บไฟล์ล่าสุดไว้ตรวจ
     </div>
   </div>
+
+ </div>
 
 </div>
 

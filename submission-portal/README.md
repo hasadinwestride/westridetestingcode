@@ -264,8 +264,8 @@ Shared Drive ถ้าแอดเป็น group ก็จัดการที
 
 | ค่า | ผลลัพธ์ | เหมาะกับ |
 |---|---|---|
-| `module-first` *(ค่าตั้งต้น)* | `Students/Module-01/หัศดินทร์ ส่องสี/01-user-research-plan_หัศดินทร์.pdf` | **ตรวจงาน** — เปิดโฟลเดอร์โมดูลเดียวเห็นงานทุกคน |
-| `student-first` | `Students/หัศดินทร์ ส่องสี/Module-01/…` | ดูพัฒนาการรายคนตลอดคอร์ส |
+| `module-first` *(ค่าตั้งต้น)* | `Students/Project: UX Design Process/หัศดินทร์ ส่องสี/01-user-research-plan_หัศดินทร์.pdf` | **ตรวจงาน** — เปิดโฟลเดอร์โปรเจกต์เดียวเห็นงานทุกคน |
+| `student-first` | `Students/หัศดินทร์ ส่องสี/Project: UX Design Process/…` | ดูพัฒนาการรายคนตลอดคอร์ส |
 | `flat` | `Students/หัศดินทร์ ส่องสี/…` | คอร์สที่มีโมดูลเดียว |
 
 เปลี่ยนค่านี้ระหว่างคอร์ส **ไม่ย้ายไฟล์เก่าให้** ไฟล์ที่ส่งไปแล้วจะค้างอยู่โครงเดิม
@@ -283,8 +283,8 @@ Shared Drive ถ้าแอดเป็น group ก็จัดการที
 
 ```javascript
 'module-02': {
-  title: 'Research Methodology',
-  folderName: 'Module-02',
+  title: 'Project: Research Methodology',
+  folderName: 'Project: Research Methodology',
   slots: [
     { id: '04', label: 'Interview Guide', filePrefix: '04-interview-guide' },
     { id: '05', label: 'Research Plan',   filePrefix: '05-research-plan' }
@@ -292,7 +292,9 @@ Shared Drive ถ้าแอดเป็น group ก็จัดการที
 }
 ```
 
-- `title` ขึ้นเป็นชื่อแท็บเบราว์เซอร์ ไม่ได้โชว์ในหน้า (หน้าบทเรียนมีหัวข้อของตัวเองแล้ว)
+- `title` เป็นทั้งชื่อแท็บเบราว์เซอร์และหัวข้อบนหน้าส่งงานตอนเปิดเป็นแท็บของตัวเอง
+  (แบบฝัง iframe จะซ่อนหัวข้อไว้ เพราะหน้าบทเรียนมีของตัวเองแล้ว)
+- `folderName` คือชื่อโฟลเดอร์จริงใน Drive ตั้งให้ตรงกับ `title` ไปเลยจะหาง่ายที่สุด
 - `id` ควรไล่ต่อเนื่องข้ามโมดูล จะได้ไม่มีเลขนำหน้าไฟล์ซ้ำกันทั้งคอร์ส
 - จำนวน slot จะกี่ชิ้นก็ได้ หน้าเว็บสร้างช่องอัปโหลดตามที่ประกาศไว้
 
