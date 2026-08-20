@@ -123,7 +123,8 @@
 </div>
 
 <script>
-  // ใช้ <?!= ?> เพราะ <?= ?> จะ escape เครื่องหมายคำพูดจน JSON พัง
+  // สองบรรทัดล่างต้องใช้ scriptlet แบบ force-print เท่านั้น
+  // แบบธรรมดาจะ escape เครื่องหมายคำพูดจน JSON พัง
   var MODULE_ID = <?!= JSON.stringify(moduleId) ?>;
   var SLOTS = <?!= JSON.stringify(slots) ?>;
   var MAX_BYTES = <?= maxFileMb ?> * 1024 * 1024;
