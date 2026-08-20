@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --brand: #1D4ED8;
+    --ink: #0B1B3F;
+    --muted: #667591;
+    --line: #E6EBF4;
+    --tint: #EEF3FF;
+    --ok: #0F8A50;
+    --err: #C22B2B;
+    --warn: #9A6200;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: 'Sarabun', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    line-height: 1.55;
+    background: #fff;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 2px 2px 6px; }
+
+  /* เปิดเป็นแท็บของตัวเอง — จัดให้อยู่กลางจอ มีหัวข้อบอกว่าหน้านี้คืออะไร */
+  body.standalone { background: #F4F7FC; }
+  body.standalone .wrap {
+    max-width: 620px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  body.standalone .panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px 24px;
+    box-shadow: 0 2px 10px rgba(11, 27, 63, .06);
+  }
+  .head { margin-bottom: 16px; }
+  .head .eyebrow {
+    font-size: 12px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--brand);
+  }
+  .head h1 { font-size: 22px; font-weight: 800; margin: 4px 0 0; line-height: 1.4; }
+  body.embed .head { display: none; }
+
+  .card { background: var(--tint); border-radius: 14px; padding: 14px 16px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  input {
+    flex: 1 1 200px;
+    min-width: 0;
+    font: inherit;
+    font-size: 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--ink);
+  }
+  input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+  button {
+    font: inherit;
+    font-weight: 700;
+    padding: 10px 20px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--brand);
+    color: #fff;
+    cursor: pointer;
+  }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  button.ghost {
+    background: #fff; color: var(--muted);
+    border: 1px solid var(--line); padding: 6px 14px; font-weight: 600; font-size: 13px;
+  }
+
+  .hint { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+  .hint.bad { color: var(--err); }
+
+  .who {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    background: var(--tint); border-radius: 10px; padding: 8px 14px; margin-bottom: 10px;
+  }
+  .who b { font-size: 14.5px; }
+
+  .slot {
+    background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--brand);
+    border-radius: 10px; padding: 11px 14px; margin-bottom: 8px;
+  }
+  .slot h3 { font-size: 14.5px; margin: 0; }
+  .slot .state { font-size: 13px; margin-top: 4px; }
+  .slot .state.done { color: var(--ok); font-weight: 700; }
+  .slot .state.err { color: var(--err); font-weight: 700; }
+  .slot.busy { opacity: .6; pointer-events: none; }
+
+  .drop {
+    border: 1.5px dashed var(--line); border-radius: 9px; padding: 9px;
+    margin-top: 8px; text-align: center; font-size: 13px; color: var(--muted); cursor: pointer;
+  }
+  .drop.over { border-color: var(--brand); background: var(--tint); color: var(--brand); }
+
+  .foot { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body class="<?= embed ? 'embed' : 'standalone' ?>">
+<div class="wrap">
+
+ <div class="panel">
+
+  <div class="head">
+    <div class="eyebrow">ส่งงาน</div>
+    <h1><?= moduleTitle ?></h1>
+  </div>
+
+  <div id="signin">
+    <div class="card">
+      <div class="row">
+        <input type="text" id="name" autocomplete="name" spellcheck="false"
+               placeholder="ชื่อ-นามสกุล เช่น หัศดินทร์ ส่องสี">
+        <input type="email" id="who" autocomplete="email" spellcheck="false"
+               placeholder="อีเมลของคุณ">
+        <button id="btnSignin">เปิดช่องส่งงาน</button>
+      </div>
+      <p class="hint" id="signinMsg">ครั้งแรกกรอกทั้งสองช่อง ครั้งต่อไปกรอกแค่อีเมลเดิม ระบบจำได้เอง</p>
+    </div>
+  </div>
+
+  <div id="portal" class="hidden">
+    <div class="who">
+      <b id="whoName"></b>
+      <button class="ghost" id="btnSignout">ไม่ใช่คุณ?</button>
+    </div>
+    <div id="slots"></div>
+    <div class="foot">
+      PDF ไม่เกิน <?= maxFileMb ?>MB ต่อชิ้น · ระบบตั้งชื่อไฟล์ให้อัตโนมัติ · ส่งซ้ำได้ ระบบเก็บไฟล์ล่าสุดไว้ตรวจ
+    </div>
+  </div>
+
+ </div>
+
+</div>
+
+<script>
+  // สองบรรทัดล่างต้องใช้ scriptlet แบบ force-print เท่านั้น
+  // แบบธรรมดาจะ escape เครื่องหมายคำพูดจน JSON พัง
+  var MODULE_ID = <?!= JSON.stringify(moduleId) ?>;
+  var SLOTS = <?!= JSON.stringify(slots) ?>;
+  var MAX_BYTES = <?= maxFileMb ?> * 1024 * 1024;
+  var session = null;
+
+  var el = function (id) { return document.getElementById(id); };
+
+  // ----------------------------------------------------------- iframe height
+
+  // หน้านี้ถูกฝังใน LMS ผ่าน iframe และ Apps Script ยังซ้อน iframe ให้อีกชั้น
+  // window.top จึงเป็นหน้าบทเรียนจริง ส่วน parent เป็นตัวห่อของ Apps Script
+  function postHeight() {
+    var h = Math.ceil(document.documentElement.getBoundingClientRect().height) + 4;
+    var msg = { type: 'westride-portal-height', height: h };
+    try { window.parent.postMessage(msg, '*'); } catch (e) {}
+    try { if (window.top !== window.parent) window.top.postMessage(msg, '*'); } catch (e) {}
+  }
+
+  window.addEventListener('load', postHeight);
+  if (window.ResizeObserver) {
+    new ResizeObserver(postHeight).observe(document.documentElement);
+  }
+
+  // ---------------------------------------------------------------- sign in
+
+  el('btnSignin').addEventListener('click', signIn);
+  ['name', 'who'].forEach(function (id) {
+    el(id).addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') signIn();
+    });
+  });
+
+  function signIn() {
+    var who = el('who').value.trim();
+    var name = el('name').value.trim();
+    if (!who) return setHint('กรอกอีเมลของคุณด้วยครับ', true);
+
+    el('btnSignin').disabled = true;
+    setHint('กำลังเปิดช่องส่งงาน…', false);
+
+    google.script.run
+      .withSuccessHandler(function (res) {
+        session = { who: who, fullName: res.fullName, folderName: res.folderName };
+        el('btnSignin').disabled = false;
+        showPortal(res.submissions || {});
+      })
+      .withFailureHandler(function (err) {
+        el('btnSignin').disabled = false;
+        setHint(err.message || 'เปิดช่องส่งงานไม่สำเร็จ', true);
+      })
+      .api_signIn({ who: who, fullName: name, moduleId: MODULE_ID });
+  }
+
+  function setHint(msg, isBad) {
+    var hint = el('signinMsg');
+    hint.textContent = msg;
+    hint.className = isBad ? 'hint bad' : 'hint';
+  }
+
+  el('btnSignout').addEventListener('click', function () {
+    session = null;
+    el('who').value = '';
+    el('name').value = '';
+    setHint('ครั้งแรกกรอกทั้งสองช่อง ครั้งต่อไปกรอกแค่อีเมลเดิม ระบบจำได้เอง', false);
+    el('portal').classList.add('hidden');
+    el('signin').classList.remove('hidden');
+    postHeight();
+  });
+
+  // ------------------------------------------------------------------ portal
+
+  function showPortal(submissions) {
+    el('whoName').textContent = session.fullName;
+    el('signin').classList.add('hidden');
+    el('portal').classList.remove('hidden');
+
+    var container = el('slots');
+    container.innerHTML = '';
+    SLOTS.forEach(function (slot) {
+      container.appendChild(buildSlot(slot, submissions[slot.id]));
+    });
+    postHeight();
+  }
+
+  function buildSlot(slot, submitted) {
+    var card = document.createElement('div');
+    card.className = 'slot';
+    card.id = 'slot-' + slot.id;
+
+    var title = document.createElement('h3');
+    title.textContent = slot.label;
+
+    var state = document.createElement('div');
+    state.className = 'state';
+    state.id = 'state-' + slot.id;
+
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf';
+    input.className = 'hidden';
+    input.addEventListener('change', function () {
+      if (input.files[0]) upload(slot, input.files[0]);
+      input.value = '';
+    });
+
+    var drop = document.createElement('div');
+    drop.className = 'drop';
+    drop.textContent = 'ลากไฟล์ PDF มาวาง หรือคลิกเพื่อเลือกไฟล์';
+    drop.addEventListener('click', function () { input.click(); });
+    ['dragenter', 'dragover'].forEach(function (evt) {
+      drop.addEventListener(evt, function (e) {
+        e.preventDefault();
+        drop.classList.add('over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(function (evt) {
+      drop.addEventListener(evt, function (e) {
+        e.preventDefault();
+        drop.classList.remove('over');
+      });
+    });
+    drop.addEventListener('drop', function (e) {
+      var file = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) upload(slot, file);
+    });
+
+    card.appendChild(title);
+    card.appendChild(state);
+    card.appendChild(input);
+    card.appendChild(drop);
+
+    renderState(slot.id, submitted);
+    return card;
+  }
+
+  function renderState(slotId, submitted) {
+    var state = el('state-' + slotId);
+    if (!state) return;
+    if (submitted) {
+      state.className = 'state done';
+      state.textContent = '✅ ส่งแล้ว · ' + submitted.submittedAt;
+    } else {
+      state.className = 'state';
+      state.textContent = 'ยังไม่ได้ส่ง';
+    }
+  }
+
+  // ------------------------------------------------------------------ upload
+
+  function upload(slot, file) {
+    var state = el('state-' + slot.id);
+    var card = el('slot-' + slot.id);
+
+    if (file.type !== 'application/pdf') {
+      return fail(state, 'รับเฉพาะไฟล์ PDF เท่านั้น');
+    }
+    if (file.size > MAX_BYTES) {
+      return fail(state, 'ไฟล์ใหญ่เกิน ' + (MAX_BYTES / 1024 / 1024) + 'MB กรุณาบีบอัดก่อนส่ง');
+    }
+
+    card.classList.add('busy');
+    state.className = 'state';
+    state.textContent = 'กำลังอัปโหลด…';
+
+    var reader = new FileReader();
+    reader.onerror = function () {
+      card.classList.remove('busy');
+      fail(state, 'อ่านไฟล์ไม่สำเร็จ กรุณาลองใหม่');
+    };
+    reader.onload = function () {
+      var base64 = String(reader.result).split(',')[1];
+      google.script.run
+        .withSuccessHandler(function (res) {
+          card.classList.remove('busy');
+          renderState(slot.id, res);
+        })
+        .withFailureHandler(function (err) {
+          card.classList.remove('busy');
+          fail(state, err.message || 'อัปโหลดไม่สำเร็จ');
+        })
+        .api_upload({
+          who: session.who,
+          fullName: session.fullName,
+          moduleId: MODULE_ID,
+          slotId: slot.id,
+          mimeType: file.type,
+          sizeBytes: file.size,
+          dataBase64: base64
+        });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function fail(state, msg) {
+    state.className = 'state err';
+    state.textContent = '⚠️ ' + msg;
+  }
+</script>
+</body>
+</html>
