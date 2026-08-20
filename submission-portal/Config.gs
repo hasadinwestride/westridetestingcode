@@ -15,7 +15,7 @@ var CONFIG = {
   LOG_TAB: 'SubmissionLog',
 
   /** Google Group ของเมนเทอร์ ใช้แชร์โฟลเดอร์แม่ครั้งเดียว แล้วจัดการคนที่ group แทน */
-  MENTOR_GROUP: 'mentors@we-stride.com',
+  MENTOR_GROUP: 'uxui-mentors@we-stride.com',
 
   /**
    * true  = ไฟล์ถูกเก็บใน <ชื่อนักเรียน>/Module-01/...
