@@ -85,8 +85,16 @@ function randomCode_(length) {
 function lockDownRootFolder() {
   var folder = DriveApp.getFolderById(CONFIG.ROOT_FOLDER_ID);
 
-  folder.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
-  folder.setShareableByEditors(false);
+  try {
+    folder.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+    folder.setShareableByEditors(false);
+  } catch (err) {
+    throw new Error(
+      'ตั้งค่าสิทธิ์แบบนี้ไม่ได้ — โฟลเดอร์นี้น่าจะอยู่ใน Shared Drive ' +
+      'ให้ไปตั้งค่าที่หน้า Shared drive settings แทน (ดูหัวข้อ "ตั้งค่า Shared Drive" ใน README) ' +
+      'ข้อความจากระบบ: ' + err.message
+    );
+  }
 
   var removed = [];
   folder.getEditors().forEach(function (user) {
